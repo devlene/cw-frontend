@@ -1,0 +1,14 @@
+div {
+    background-color: #d77d7d;
+    padding: 20px;
+    border-radius: 50px;
+    align-items: center;
+    display: flex;
+    flex-direction: column;
+}
+
+img {
+    max-width: 50%;
+    height: auto;
+    border-radius: 20px;
+}
