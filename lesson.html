@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Math Lesson</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+        <div id ="lesson">
+            <h1>{{lessonProduct.lessonTitle}}</h1>
+            <p> Subject: {{lessonProduct.subject}}</p>
+            <p> Location: {{lessonProduct.location}}</p>
+            <p> Available spots: {{lessonProduct.availability}}</p>
+            <p> Price: {{lessonProduct.price}}</p>
+            <button v-on:click="addToCart" :disabled="!canAddToCart">{{buttonText}}</button>
+            <p> Items in Cart: {{cartItemCount}}</p>
+            <img v-bind:src="lessonProduct.photo.image" v-bind:alt="lessonProduct.photo.alt">
+        </div>
+
+    <script type = "module">
+        const { createApp } = Vue;
+        const myApp = createApp({
+            data() {
+                return {
+                    lessonProduct: {
+                        lessonTitle: 'Math Lesson',
+                        lessonId: 1001,
+                        subject: 'Math',
+                        location: 'Middlesex University, Hendon, Room C105',
+                        price: '$15 per session',
+                        availability: 5,
+                        photo: {
+                            image: 'images/math.jpg',
+                            alt: 'Math Lesson'
+                        }
+                    },
+                    cart: [],
+                    buttonText: "Add to Cart"
+                }
+            },
+            computed:{
+                cartItemCount(){
+                    return this.cart.length;
+                },
+                canAddToCart(){
+                    if(this.lessonProduct.availability > 0){
+                        return true;
+                    } else {
+                        return false;
+                    }
+                }
+            },
+            methods: {
+                addToCart() {
+                    this.buttonText = "Added to Cart";
+                    this.cart.push(this.lessonProduct.lessonId);
+                    this.lessonProduct.availability--;
+                    if (this.lessonProduct.availability <= 0) {
+                        this.buttonText = "Sold Out";
+                        //this.canAddToCart = false;
+                    }
+                }
+            }
+        });
+        myApp.mount("#lesson");
+    </script>
+</body>
+</html>
