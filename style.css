@@ -1,7 +1,7 @@
 div {
-    background-color: #afafaf;
+    background-color: #d3d3d3;
     padding: 20px;
-    border-radius: 50px;
+    border-radius: 10px;
     align-items: center;
     display: flex;
     flex-direction: column;
@@ -11,4 +11,10 @@ img {
     max-width: 50%;
     height: auto;
     border-radius: 20px;
+}
+
+figure {
+    display: flex;
+    justify-content: center;
+    margin-top: 20px;
 }

@@ -5,18 +5,41 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Math Lesson</title>
     <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+    <script src="lessons.js"></script>
 </head>
 <body>
     <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
         <div id ="lesson">
-            <h1>{{lessonProduct.lessonTitle}}</h1>
-            <p> Subject: {{lessonProduct.subject}}</p>
-            <p> Location: {{lessonProduct.location}}</p>
-            <p> Available spots: {{lessonProduct.availability}}</p>
-            <p> Price: {{lessonProduct.price}}</p>
-            <button v-on:click="addToCart" :disabled="!canAddToCart">{{buttonText}}</button>
-            <p> Items in Cart: {{cartItemCount}}</p>
-            <img v-bind:src="lessonProduct.photo.image" v-bind:alt="lessonProduct.photo.alt">
+            <div v-if="showProduct">
+                 <button v-on:click="toggleCheckOut()">  <i class="fa fa-shopping-cart" aria-hidden="true"></i> Checkout ({{cartItemCount}})</button>
+                <div v-for="lessonProduct in lessons">
+                    <h1>{{lessonProduct.lessonTitle}}</h1>
+                    <p> Subject: {{lessonProduct.subject}}</p>
+                    <p> Location: {{lessonProduct.location}}</p>
+                    <p> Available spots: {{lessonProduct.availability}}</p>
+                    <p> Price: {{lessonProduct.price}}</p>
+                    <button v-on:click="addToCart(lessonProduct)" :disabled="!canAddToCart(lessonProduct)"> <i class="fa fa-shopping-cart" aria-hidden="true"></i> {{buttonText(lessonProduct)}}</button>
+                    <p> Items of this type in Cart: {{cartProductCount(lessonProduct.lessonId)}}</p>
+                    <figure>
+                    <img v-bind:src="lessonProduct.photo.image" v-bind:alt="lessonProduct.photo.alt">
+                    </figure>
+                </div>
+            </div>
+            
+            <div v-else>
+                <h1>Checkout Page</h1>
+                <p> Items in Cart: {{cartItemCount}}</p>
+                <ul>
+                    <div v-for="lessonProduct in lessons">
+                        <li v-if="cartProductCount(lessonProduct.lessonId) > 0">
+                        {{lessonProduct.lessonTitle}} - Quantity: {{cartProductCount(lessonProduct.lessonId)}}
+                        </li>
+                    </div>
+                </ul>
+                <button v-on:click="toggleCheckOut()">Back to Products</button>
+            </div>
+            
         </div>
 
     <script type = "module">
@@ -24,43 +47,41 @@
         const myApp = createApp({
             data() {
                 return {
-                    lessonProduct: {
-                        lessonTitle: 'Math Lesson',
-                        lessonId: 1001,
-                        subject: 'Math',
-                        location: 'Middlesex University, Hendon, Room C105',
-                        price: '$15 per session',
-                        availability: 5,
-                        photo: {
-                            image: 'images/math.jpg',
-                            alt: 'Math Lesson'
-                        }
-                    },
+                    lessons: lessonsArray,
                     cart: [],
-                    buttonText: "Add to Cart"
+                    showProduct: true
                 }
             },
             computed:{
                 cartItemCount(){
                     return this.cart.length;
                 },
-                canAddToCart(){
-                    if(this.lessonProduct.availability > 0){
-                        return true;
-                    } else {
-                        return false;
-                    }
-                }
             },
             methods: {
-                addToCart() {
-                    this.buttonText = "Added to Cart";
-                    this.cart.push(this.lessonProduct.lessonId);
-                    this.lessonProduct.availability--;
-                    if (this.lessonProduct.availability <= 0) {
-                        this.buttonText = "Sold Out";
-                        //this.canAddToCart = false;
+                addToCart(lessonProduct) {
+                    if (!this.canAddToCart(lessonProduct)) {
+                        return;
                     }
+                    this.cart.push(lessonProduct.lessonId);
+                    lessonProduct.availability--;
+                },
+                cartProductCount(lessonId) {
+                    let count = 0;
+                    for (let i = 0; i < this.cart.length; i++) {
+                        if (this.cart[i] === lessonId) {
+                            count++;
+                        }
+                    }
+                    return count;
+                },
+                canAddToCart(lessonProduct) {
+                    return lessonProduct.availability > 0;
+                },
+                buttonText(lessonProduct) {
+                    return !this.canAddToCart(lessonProduct) ? "Sold Out" : "Add to Cart";
+                },
+                toggleCheckOut() {
+                    this.showProduct = this.showProduct ? false : true;
                 }
             }
         });
