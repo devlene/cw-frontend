@@ -3,18 +3,22 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Math Lesson</title>
+    <title>After School Club</title>
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
     <script src="lessons.js"></script>
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
 </head>
 <body>
-    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
         <div id ="lesson">
             <div v-if="showProduct">
-                 <button v-on:click="toggleCheckOut()">  <i class="fa fa-shopping-cart" aria-hidden="true"></i> Checkout ({{cartItemCount}})</button>
-                <div v-for="lessonProduct in lessons">
-                    <h1>{{lessonProduct.lessonTitle}}</h1>
+                <p class = "checkOutButton">
+                <button v-on:click="toggleCheckOut()":disabled="isCartEmpty">  <i class="fa fa-shopping-cart" aria-hidden="true"></i> Checkout ({{cartItemCount}})</button>
+                </p>
+                <div id ="lessonProducts"></div>
+                <h1>After School Club</h1>
+                 <div v-for="lessonProduct in lessons">
+                    <h2>{{lessonProduct.lessonTitle}}</h2>
                     <p> Subject: {{lessonProduct.subject}}</p>
                     <p> Location: {{lessonProduct.location}}</p>
                     <p> Available spots: {{lessonProduct.availability}}</p>
@@ -25,19 +29,29 @@
                     <img v-bind:src="lessonProduct.photo.image" v-bind:alt="lessonProduct.photo.alt">
                     </figure>
                 </div>
+                
             </div>
             
             <div v-else>
                 <h1>Checkout Page</h1>
                 <p> Items in Cart: {{cartItemCount}}</p>
-                <ul>
+                <ul style = "list-style-type: none;">
                     <div v-for="lessonProduct in lessons">
                         <li v-if="cartProductCount(lessonProduct.lessonId) > 0">
-                        {{lessonProduct.lessonTitle}} - Quantity: {{cartProductCount(lessonProduct.lessonId)}}
+                        {{lessonProduct.lessonTitle}} - Quantity: {{cartProductCount(lessonProduct.lessonId)}} <button v-on:click="removeFromCart(lessonProduct)">Remove</button>
                         </li>
                     </div>
                 </ul>
-                <button v-on:click="toggleCheckOut()">Back to Products</button>
+
+                <p> First Name: <input v-model="firstName"></p>
+                <p> Last Name: <input v-model="lastName"></p>
+                <p> Email: <input v-model="email"></p>
+                <p> Phone Number: <input v-model="phoneNumber"></p>
+                <button v-on:click="checkOut" :disabled="isInfoEmpty"> <i class="fa fa-shopping-cart" aria-hidden="true"></i> Check Out</button>
+                <p v-if="isInfoEmpty">Please fill in all required information.</p>
+                
+                <p v-else-if="isSubmitted">Thank you for your order, {{firstName}} {{lastName}}! We will contact you at {{email}} or {{phoneNumber}}.</p>
+                <button v-on:click="toggleCheckOut()"> <i class="fa fa-arrow-left" aria-hidden="true"></i> Back to Products</button>
             </div>
             
         </div>
@@ -49,13 +63,27 @@
                 return {
                     lessons: lessonsArray,
                     cart: [],
-                    showProduct: true
+                    showProduct: true,
+                    firstName: "",
+                    lastName: "",
+                    email: "",
+                    phoneNumber: "",
+                    isSubmitted: false
                 }
             },
             computed:{
                 cartItemCount(){
                     return this.cart.length;
                 },
+                isCartEmpty() {
+                    return this.cart.length === 0;
+                },
+                isInfoEmpty() {
+                    if (this.firstName === "" || this.lastName === "" || this.email === "" || this.phoneNumber === "") {
+                        return true;
+                    }
+                    return false;
+                }
             },
             methods: {
                 addToCart(lessonProduct) {
@@ -64,6 +92,13 @@
                     }
                     this.cart.push(lessonProduct.lessonId);
                     lessonProduct.availability--;
+                },
+                removeFromCart(lessonProduct) {
+                    const index = this.cart.indexOf(lessonProduct.lessonId);
+                    if (index !== -1) {
+                        this.cart.splice(index, 1);
+                        lessonProduct.availability++;
+                    }
                 },
                 cartProductCount(lessonId) {
                     let count = 0;
@@ -82,6 +117,14 @@
                 },
                 toggleCheckOut() {
                     this.showProduct = this.showProduct ? false : true;
+                },
+                checkOut() {
+                    if (this.isInfoEmpty) {
+                        return false;
+                    }
+                    this.isSubmitted = true;
+                    this.cart = [];
+                    return true;
                 }
             }
         });
